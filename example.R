@@ -276,3 +276,30 @@ mcmc_trace(post_lc2d_mcmc, n_warmup = 200,
            pars = c("beta[1,1]", "beta[1,2]", "beta[7,1]", "beta[7,2]", 
                     "gamma[1]", "gamma[2]", "gamma[3]", "lp__"))
 
+
+# lcmnl (constrained) (with demos) ------------------------------------------
+
+lcmnl_model_constrained = stan_model(file = "lcmnl-constrained.stan")
+
+lc2d_constrained_map = optimizing(lcmnl_model_constrained, data = data_stan, hessian = TRUE, verbose = TRUE, 
+                      algorithm = "BFGS", iter = 1000, 
+                      init = 0, tol_grad = 1e-16, tol_rel_grad = 1e-16)
+
+data.table(par = c(paste0("class.", rep(1:2, each = 7), ".", 
+                          rep(colnames(X), 2)), c("asc", "female", "age_26")),
+           est = round(lc2d_constrained_map$par[1:17], 4),
+           se = round(sqrt(diag(solve(-lc2d_constrained_map$hessian))), 4))
+
+# full bayes -----------------------------------------------------------------------------
+lc2d_constrained_mcmc = sampling(lcmnl_model_constrained, data = data_stan, pars = c("beta", "gamma"), 
+                     init = 0, seed = 123, warmup = 200, iter = 1200, cores = 4)
+
+print(lc2d_constrained_mcmc, digits_summary = 4, probs = c(0.025, 0.5, 0.975),
+      pars = c("beta", "gamma", "lp__"))
+
+post_lc2d_constrained_mcmc = extract(lc2d_constrained_mcmc, inc_warmup = TRUE, permuted = FALSE)
+
+
+mcmc_trace(post_lc2d_constrained_mcmc, n_warmup = 200,
+           pars = c("beta[1,1]", "beta[1,2]", "beta[7,1]", "beta[7,2]", 
+                    "gamma[1]", "gamma[2]", "gamma[3]", "lp__"))

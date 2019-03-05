@@ -17,7 +17,20 @@ data {
 }
 
 parameters {
-  matrix[K, S] beta;
+  // instead of just including a "beta" parameter, we split this up into 
+  // a matrix (beta_head) and a vector (the last row of beta)
+  // which we constrain to be ordered across the latent classes
+  // this will ensure that the class assignments are the same across chains
+  // we join these two pieces together in the "transfored parameters" block
+  
+  // we have to do this here because it's the only place you can place an 
+  // "ordered" constraint on values in stan
+  // we can also only do it on one row since the ordering of utilities for 
+  // one level may not be the same for any others (and one row is enough)
+  matrix[K-1, S] beta_head;
+  ordered[S] beta_tail; 
+  
+  
   vector[L] gamma;
 }
 
@@ -25,7 +38,11 @@ transformed parameters {
   vector[S] log_theta[I];
   matrix[M, S] u;
   matrix[N, S] log_p;
-
+  matrix[K, S] beta; 
+  
+  // hee is where we join the head and tail of beta
+  beta = append_row(beta_head, to_row_vector(beta_tail)); 
+  
   // class prob
   for (i in 1:I) {
     log_theta[i] = log_softmax(Z[(1+(i-1)*S):(i*S),] * gamma);
