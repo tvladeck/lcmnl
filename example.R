@@ -287,7 +287,10 @@ lc2d_constrained_map = optimizing(lcmnl_model_constrained, data = data_stan, hes
 
 data.table(par = c(paste0("class.", rep(1:2, each = 7), ".", 
                           rep(colnames(X), 2)), c("asc", "female", "age_26")),
-           est = round(lc2d_constrained_map$par[1:17], 4),
+           
+           # the beta_head trick seems to permute things a bit
+           # even though the parameter estimates are pretty much exactly the same
+           est = round(lc2d_constrained_map$par[c(2, 9:14, 1, 3:8, 15:17)], 4),
            se = round(sqrt(diag(solve(-lc2d_constrained_map$hessian))), 4))
 
 # full bayes -----------------------------------------------------------------------------
@@ -303,3 +306,32 @@ post_lc2d_constrained_mcmc = extract(lc2d_constrained_mcmc, inc_warmup = TRUE, p
 mcmc_trace(post_lc2d_constrained_mcmc, n_warmup = 200,
            pars = c("beta[1,1]", "beta[1,2]", "beta[7,1]", "beta[7,2]", 
                     "gamma[1]", "gamma[2]", "gamma[3]", "lp__"))
+
+
+
+# map param comparisons b/t constrained and unconstrained -----------------
+
+constrained_params_map <- 
+  data.table(par = c(paste0("class.", rep(1:2, each = 7), ".", 
+                            rep(colnames(X), 2)), c("asc", "female", "age_26")),
+             
+             # the beta_head trick seems to permute things a bit
+             # even though the parameter estimates are pretty much exactly the same
+             est = round(lc2d_constrained_map$par[c(2, 9:14, 1, 3:8, 15:17)], 4),
+             se = round(sqrt(diag(solve(-lc2d_constrained_map$hessian))), 4)) %>% 
+  gather(key = stat, value = value, -par) %>% 
+  mutate(model = "constrained")
+
+unconstrained_params_map <- 
+  data.table(par = c(paste0("class.", rep(1:2, each = 7), ".", 
+                            rep(colnames(X), 2)), c("asc", "female", "age_26")),
+             est = round(lc2d_map$par[1:17], 4),
+             se = round(sqrt(diag(solve(-lc2d_map$hessian))), 4)) %>% 
+  gather(key = stat, value = value, -par) %>% 
+  mutate(model = "unconstrained")
+
+
+bind_rows(constrained_params_map, unconstrained_params_map) %>% 
+  spread(model, value)
+
+

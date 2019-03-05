@@ -18,7 +18,7 @@ data {
 
 parameters {
   // instead of just including a "beta" parameter, we split this up into 
-  // a matrix (beta_head) and a vector (the last row of beta)
+  // a matrix (beta_tail) and a vector (the first row of beta)
   // which we constrain to be ordered across the latent classes
   // this will ensure that the class assignments are the same across chains
   // we join these two pieces together in the "transfored parameters" block
@@ -27,9 +27,8 @@ parameters {
   // "ordered" constraint on values in stan
   // we can also only do it on one row since the ordering of utilities for 
   // one level may not be the same for any others (and one row is enough)
-  matrix[K-1, S] beta_head;
-  ordered[S] beta_tail; 
-  
+  ordered[S] beta_head; 
+  matrix[K-1, S] beta_tail;
   
   vector[L] gamma;
 }
@@ -40,8 +39,8 @@ transformed parameters {
   matrix[N, S] log_p;
   matrix[K, S] beta; 
   
-  // hee is where we join the head and tail of beta
-  beta = append_row(beta_head, to_row_vector(beta_tail)); 
+  // here is where we join the head and tail of beta
+  beta = append_row(to_row_vector(beta_head), beta_tail); 
   
   // class prob
   for (i in 1:I) {
