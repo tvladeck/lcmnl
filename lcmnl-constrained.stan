@@ -71,11 +71,28 @@ model {
 
 generated quantities {
   
-  vector[S] theta[I]; 
+  vector[S] theta[I]; // prior class prob
+  vector[S] lps[I]; // likelihood conditional on being in class
+  vector[S] alpha[I]; // posterior class prob
+  
   
   for (i in 1:I) {
     theta[i] = exp(log_theta[i]);
   }
+  
+  for (i in 1:I) {
+    for (s in 1:S) {
+      lps[i][s] = sum(log_p[start_i[i]:end_i[i], s]);
+    }
+  }
+  
+  for (i in 1:I) {
+    real denom = dot_product(theta[i], lps[i]); 
+    for (s in 1:S) {
+      alpha[i][s] = (theta[i][s] * lps[i][s]) / denom; 
+    }
+  }
+  
   
 }
 
