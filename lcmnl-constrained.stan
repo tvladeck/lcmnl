@@ -82,7 +82,7 @@ generated quantities {
   
   for (i in 1:I) {
     for (s in 1:S) {
-      lps[i][s] = sum(log_p[start_i[i]:end_i[i], s]);
+      lps[i][s] = exp(sum(log_p[start_i[i]:end_i[i], s]));
     }
   }
   
