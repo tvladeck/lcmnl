@@ -69,5 +69,14 @@ model {
   }
 }
 
+generated quantities {
+  
+  vector[S] theta[I]; 
+  
+  for (i in 1:I) {
+    theta[i] = exp(log_theta[i]);
+  }
+  
+}
 
 
