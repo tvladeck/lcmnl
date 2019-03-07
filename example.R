@@ -295,7 +295,7 @@ data.table(par = c(paste0("class.", rep(1:2, each = 7), ".",
            se = round(sqrt(diag(solve(-lc2d_constrained_map$hessian))), 4))
 
 # full bayes -----------------------------------------------------------------------------
-lc2d_constrained_mcmc = sampling(lcmnl_model_constrained, data = data_stan, pars = c("beta", "gamma", "theta"), 
+lc2d_constrained_mcmc = sampling(lcmnl_model_constrained, data = data_stan, pars = c("beta", "gamma", "alpha"), 
                      init = 0, seed = 123, warmup = 200, iter = 1200, cores = 4)
 
 print(lc2d_constrained_mcmc, digits_summary = 4, probs = c(0.025, 0.5, 0.975),
@@ -306,14 +306,17 @@ post_lc2d_constrained_mcmc = extract(lc2d_constrained_mcmc, inc_warmup = TRUE, p
 
 mcmc_trace(post_lc2d_constrained_mcmc, n_warmup = 200,
            pars = c("beta[1,1]", "beta[1,2]", "beta[7,1]", "beta[7,2]", 
-                    "theta[40,1]", "gamma[1]", "gamma[2]", "lp__"))
+                    "gamma[1]", "gamma[2]", 
+                    "alpha[40,1]", "lp__"))
 
 mcmc_trace(post_lc2d_constrained_mcmc, n_warmup = 200,
-           pars = c("theta[40,1]", "theta[1,1]", "theta[100,1]", "theta[20,1]"))
+           pars = c("alpha[1,1]", "alpha[10,1]", "alpha[70,1]", "alpha[80,2]", 
+                    "alpha[40,1]"))
+
 
 post_lc2d_constrained_mcmc[, 1, 19:130] %>% 
   apply(2, mean) %>% 
-  hist(main = "Class 1 Thetas (w/ Demos)")
+  hist(100, main = "Class 1 Posterior Probabilities (w/ Demos)")
 
 # map param comparisons b/t constrained and unconstrained -----------------
 
