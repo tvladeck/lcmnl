@@ -4,7 +4,7 @@ library(gmnl)
 library(flexmix)
 
 # Data ===================================================================================
-data = fread("data.csv") 
+data = read.csv("data.csv") 
 
 # simple cbc analysis with 131 students with 14 tasks each
 # 2 alternatives (chocolate bars) + outside option 
@@ -91,6 +91,7 @@ summary(flx1)
 # price      -1.157713   0.092683 -12.4911 < 2.2e-16 ***
 
 # LC_MNL
+set.seed(1)
 flx2 = stepFlexmix(choice ~ 0 + none + brand_1 + brand_2 + ftlabel + 
                      cocoa_low + cocoa_high +  price | id,
                    model = FLXMRcondlogit(strata = ~ obs), 
