@@ -10,7 +10,7 @@ data = read.csv("data.csv")
 # 2 alternatives (chocolate bars) + outside option 
 # 4 attributes:
 #    brands: 1, 2, 3 (ref)
-#    cocoa: low, middle (ref), high
+#    cocoa content: low, middle (ref), high
 #    fairtrade label: 1 (yes), no (ref)
 #    price (in Euro): 0.89, 0.99, 1.19, 1.49, 1.99
 # 2 demographic variables:  
@@ -99,8 +99,8 @@ flx2 = stepFlexmix(choice ~ 0 + none + brand_1 + brand_2 + ftlabel +
                    data = data, k = 2, nrep = 10, drop = TRUE)
 summary(flx2)
 #        prior size post>0 ratio
-# Comp.1  0.55 3066   3654 0.839
-# Comp.2  0.45 2436   3822 0.637
+# Comp.1 0.551 3066   3654 0.839
+# Comp.2 0.449 2436   3822 0.637
 # 
 # 'log Lik.' -1579.286 (df=17)
 # AIC: 3192.571   BIC: 3304.99 
@@ -110,48 +110,49 @@ flx2 = refit(flx2)
 summary(flx2, which = "model")
 # $Comp.1
 #             Estimate Std. Error  z value  Pr(>|z|)    
-# none       -4.356248   0.272512 -15.9855 < 2.2e-16 ***
-# brand_1     0.277938   0.057518   4.8322  1.35e-06 ***
-# brand_2    -0.185556   0.057055  -3.2522  0.001145 ** 
-# ftlabel     0.134702   0.046002   2.9282  0.003410 ** 
-# cocoa_low   0.025773   0.077161   0.3340  0.738362    
-# cocoa_high -0.065367   0.080837  -0.8086  0.418733    
-# price      -1.233440   0.120094 -10.2706 < 2.2e-16 ***
+# none       -4.355226   0.272411 -15.9877 < 2.2e-16 ***
+# brand_1     0.277961   0.057517   4.8326 1.347e-06 ***
+# brand_2    -0.185545   0.057053  -3.2521  0.001145 ** 
+# ftlabel     0.134631   0.046001   2.9267  0.003426 ** 
+# cocoa_low   0.025950   0.077160   0.3363  0.736634    
+# cocoa_high -0.065471   0.080835  -0.8099  0.417976    
+# price      -1.233194   0.120086 -10.2692 < 2.2e-16 ***
 # 
 # $Comp.2
 #             Estimate Std. Error z value  Pr(>|z|)    
-# none       -0.821586   0.220252 -3.7302 0.0001913 ***
-# brand_1     0.279498   0.078763  3.5486 0.0003873 ***
-# brand_2    -0.252067   0.085006 -2.9653 0.0030240 ** 
-# ftlabel     0.456298   0.062989  7.2441 4.352e-13 ***
-# cocoa_low   0.978174   0.093446 10.4678 < 2.2e-16 ***
-# cocoa_high -0.568383   0.102636 -5.5378 3.062e-08 ***
-# price      -1.164365   0.169544 -6.8676 6.528e-12 ***
+# none       -0.821817   0.220240 -3.7315 0.0001904 ***
+# brand_1     0.279536   0.078760  3.5492 0.0003864 ***
+# brand_2    -0.252101   0.085000 -2.9659 0.0030181 ** 
+# ftlabel     0.456371   0.062985  7.2457 4.302e-13 ***
+# cocoa_low   0.978092   0.093442 10.4673 < 2.2e-16 ***
+# cocoa_high -0.568215   0.102630 -5.5365 3.085e-08 ***
+# price      -1.164198   0.169526 -6.8674 6.540e-12 ***
 
 summary(flx2, which = "concomitant")
 #             Estimate Std. Error z value Pr(>|z|)  
-# (Intercept) -0.51422    0.28902 -1.7792  0.07521 .
-# female       0.52614    0.37155  1.4161  0.15676  
-# age_26       0.27292    0.39151  0.6971  0.48574  
+# (Intercept) -0.51451    0.28903 -1.7801  0.07506 .
+# female       0.52605    0.37156  1.4158  0.15683  
+# age_26       0.27309    0.39152  0.6975  0.48548  
 
 
 # Analysis of results ====================================================================
 
-# the parameter estimates are virtally identical
+# the parameter estimates are virtually identical
 plot(coef(lc2), flx2@coef, ylab = "coefs. gmnl", xlab = "coefs. flexmix")
 abline(0, 1)
 
 # however, we see some differences for the SEs
 se_gmnl = sqrt(diag(vcov(lc2))) # gmnl
-se_flexmix = sqrt(diag(flx2@vcov)) # # flexmix
+se_flexmix = sqrt(diag(flx2@vcov)) # flexmix
 
-ratio = round(se_flexmix / se_gmnl, 3)
+ratio = round(se_flexmix / se_gmnl, 2)
 table(ratio)
-#  1 3.742 
-# 14     3 
+#  1 3.74 
+# 14    3 
+
 ratio[ratio > 1]
-# - SEs for the utility paramaters are almost the same
+# - SEs for the utility parameters are almost the same
 # - SEs for the concomitant vars are about 3.742 times large in flexmix
-# - 3.742^2 is approx. 14, which is the number of choice tasks per respondent
-# - Hence my hunch is, that gmnl incorrectly uses the number of observations
+# - 3.74^2 is approx. 14, which is the number of choice tasks per respondent
+# - My hunch is, that gmnl incorrectly uses (in the case of panel data) the number of obs.
 #   when computing the SE for class parameters instead of the number of respondents.
