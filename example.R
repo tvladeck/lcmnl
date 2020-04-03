@@ -115,6 +115,7 @@ mnl_model = stan_model(file = "mnl.stan")
 # build stan data list
 index_n = data[, .(id = first(id), y = row[choice == 1], 
                    start_n = first(row), end_n = last(row)), by = obs]
+
 data_stan = list(N = max(index_n$obs),
                  M = nrow(X),
                  K = ncol(X), 
@@ -168,7 +169,7 @@ mcmc_trace(post_mnl_mcmc, n_warmup = 200,
 
 
 # LC MNL (no demographcs) ----------------------------------------------------------------
-lcmnl_model = stan_model(file = "lcmnl.stan")
+lcmnl_model = stan_model(file = "lcmnl-constrained.stan")
 
 # build individual indeces
 index_i = data[,.(start_i = first(obs), end_i = last(obs)), by = id]
